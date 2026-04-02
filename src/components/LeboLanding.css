@@ -1438,6 +1438,21 @@
   transform: translate(-50%, -50%) !important;
 }
 
+/* ── Mobile : pendant la vidéo, réduire la red-zone à la hauteur réelle de la vidéo ──
+   La vidéo fait 96vw de large. En 16:9 : hauteur = 96vw × 9/16 = 54vw.
+   On ajoute 5rem de marge (2.5rem haut + 2.5rem bas) et on positionne
+   la vidéo à 2.5rem du haut au lieu de la centrer dans 100vh. */
+@media (max-width: 768px) {
+  .video-playing .red-zone {
+    height: calc(54vw + 5rem) !important;
+    min-height: unset !important;
+  }
+  .video-playing .presentation-video {
+    top: 2.5rem !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
 /* ============ HEADER RIGHT WRAPPER ============ */
 .header-right {
   display: flex;
