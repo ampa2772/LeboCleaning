@@ -58,6 +58,16 @@ const servicesDataBottom = [
     bullets: []
   },
   {
+    title: "Eco Options",
+    icon: (
+      <svg className="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><line x1="2" y1="22" x2="11" y2="13"></line>
+      </svg>
+    ),
+    desc: "Plant-based products available on request for a low-scent clean.",
+    bullets: []
+  },
+  {
     title: "Airbnb / STR Turnovers",
     icon: (
       <svg className="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -68,16 +78,6 @@ const servicesDataBottom = [
     ),
     desc: "Hotel-style turnovers with laundry, restocking, and photo proof.",
     bullets: ["Laundry & linen reset", "Restock amenities", "Photo proof on completion"]
-  },
-  {
-    title: "Eco Options",
-    icon: (
-      <svg className="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><line x1="2" y1="22" x2="11" y2="13"></line>
-      </svg>
-    ),
-    desc: "Plant-based products available on request for a low-scent clean.",
-    bullets: []
   }
 ];
 
@@ -101,6 +101,12 @@ function LeboLanding() {
   };
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
   const [openFaq, setOpenFaq] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -171,6 +177,7 @@ function LeboLanding() {
     }
   }, [currentBgIndex, isVideoEnded]);
 
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -212,7 +219,7 @@ function LeboLanding() {
   };
 
   return (
-    <div className="lebo-landing" style={appStyle}>
+    <div className={`lebo-landing${!isVideoEnded ? ' video-playing' : ''}`} style={appStyle}>
       {/* Background image - no overlay */}
       <div className="bg-image" />
 
@@ -220,29 +227,59 @@ function LeboLanding() {
       <header className="header">
         <div className="header-inner">
           <div className="header-left">
-            <div className="logo">
+            <div className="logo" onClick={() => setMenuOpen(false)}>
               <span className="logo-circle">LC</span>
               <span className="logo-text">Lebo Cleaning Services</span>
             </div>
-            <nav className="nav">
-              <a href="#services">Services</a>
-              <span className="nav-dot">·</span>
-              <a href="#service-area">Service Area</a>
-              <span className="nav-dot">·</span>
-              <a href="#pricing">Pricing</a>
-              <span className="nav-dot">·</span>
-              <a href="#process">Process</a>
-              <span className="nav-dot">·</span>
-              <a href="#faq">FAQ</a>
-            </nav>
+            <div className="nav-desktop">
+              <nav className="nav">
+                <a href="#services">Services</a>
+                <span className="nav-dot">·</span>
+                <a href="#service-area">Service Area</a>
+                <span className="nav-dot">·</span>
+                <a href="#pricing">Pricing</a>
+                <span className="nav-dot">·</span>
+                <a href="#process">Process</a>
+                <span className="nav-dot">·</span>
+                <a href="#faq">FAQ</a>
+              </nav>
+            </div>
           </div>
-          <a href="tel:4165557890" className="header-phone">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
-            </svg>
-            416-555-7890
-          </a>
+          <div className="header-right">
+            <a href="tel:4165557890" className="header-phone">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+              416-555-7890
+            </a>
+            <button
+              className={`hamburger${menuOpen ? ' hamburger--open' : ''}`}
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-nav"
+            >
+              <span className="hamburger__bar"></span>
+              <span className="hamburger__bar"></span>
+              <span className="hamburger__bar"></span>
+            </button>
+          </div>
         </div>
+
+        <nav
+          id="mobile-nav"
+          className={`mobile-nav${menuOpen ? ' mobile-nav--open' : ''}`}
+          aria-hidden={!menuOpen}
+        >
+          <a href="#services"      onClick={() => setMenuOpen(false)}>Services</a>
+          <a href="#service-area"  onClick={() => setMenuOpen(false)}>Service Area</a>
+          <a href="#pricing"       onClick={() => setMenuOpen(false)}>Pricing</a>
+          <a href="#process"       onClick={() => setMenuOpen(false)}>Process</a>
+          <a href="#faq"           onClick={() => setMenuOpen(false)}>FAQ</a>
+          <a href="tel:4165557890" onClick={() => setMenuOpen(false)} className="mobile-nav__phone">
+            Call 416-555-7890
+          </a>
+        </nav>
       </header>
 
       {/* Main Content */}
@@ -452,44 +489,46 @@ function LeboLanding() {
             <h2>Services</h2>
             <p className="services-sub">From recurring home cleans to construction dust-outs and office janitorial, we've got you covered.</p>
             
-            <div className="services-grid-top">
-              {servicesDataTop.map((srv, i) => (
-                <div key={i} className="service-card">
-                  <div className="sc-icon-wrapper">{srv.icon}</div>
-                  <div className="sc-title">{srv.title}</div>
-                  <div className="sc-desc">{srv.desc}</div>
-                  {srv.bullets && srv.bullets.length > 0 && (
-                    <ul className="sc-bullets">
-                      {srv.bullets.map((b, j) => (
-                        <li key={j} className="sc-bullet">
-                          <CheckIcon />
-                          <span>{b}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
+            <div className="services-all-cards">
+              <div className="services-grid-top">
+                {servicesDataTop.map((srv, i) => (
+                  <div key={i} className="service-card">
+                    <div className="sc-icon-wrapper">{srv.icon}</div>
+                    <div className="sc-title">{srv.title}</div>
+                    <div className="sc-desc">{srv.desc}</div>
+                    {srv.bullets && srv.bullets.length > 0 && (
+                      <ul className="sc-bullets">
+                        {srv.bullets.map((b, j) => (
+                          <li key={j} className="sc-bullet">
+                            <CheckIcon />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
 
-            <div className="services-grid-bottom">
-              {servicesDataBottom.map((srv, i) => (
-                <div key={i} className="service-card">
-                  <div className="sc-icon-wrapper">{srv.icon}</div>
-                  <div className="sc-title">{srv.title}</div>
-                  <div className="sc-desc">{srv.desc}</div>
-                  {srv.bullets && srv.bullets.length > 0 && (
-                    <ul className="sc-bullets">
-                      {srv.bullets.map((b, j) => (
-                        <li key={j} className="sc-bullet">
-                          <CheckIcon />
-                          <span>{b}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
+              <div className="services-grid-bottom">
+                {servicesDataBottom.map((srv, i) => (
+                  <div key={i} className="service-card">
+                    <div className="sc-icon-wrapper">{srv.icon}</div>
+                    <div className="sc-title">{srv.title}</div>
+                    <div className="sc-desc">{srv.desc}</div>
+                    {srv.bullets && srv.bullets.length > 0 && (
+                      <ul className="sc-bullets">
+                        {srv.bullets.map((b, j) => (
+                          <li key={j} className="sc-bullet">
+                            <CheckIcon />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

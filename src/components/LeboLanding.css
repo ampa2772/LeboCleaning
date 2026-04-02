@@ -164,7 +164,9 @@
   width: 41.8rem;
   flex-shrink: 0;
   padding: 1.5rem 1.9rem 1.9rem;
-  background: rgba(10, 25, 55, 0.08); /* 8% opacity */
+  background: rgba(10, 25, 55, 0.08); /* Keep it very transparent consistently */
+  backdrop-filter: none; /* No blur on desktop as requested */
+  -webkit-backdrop-filter: none;
   border-radius: 0.875rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
@@ -692,6 +694,12 @@
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 1px 2px 4px rgba(0, 0, 0, 0.7);
   margin-bottom: 6.5rem;
   text-align: center;
+}
+
+/* Wrapper desktop : les deux grids s'empilent normalement */
+.services-all-cards {
+  width: 100%;
+  display: block;
 }
 
 .services-grid-top {
@@ -1405,313 +1413,426 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+/* ============ VIDEO PLAYING — sections sous la vidéo cachées ============ */
+/*
+  Tant que la vidéo de présentation n'est pas terminée (.video-playing),
+  tout ce qui est en dessous de la red-zone est masqué.
+  La red-zone occupe exactement 100vh pour que la vidéo soit
+  centrée à l'écran quand on a scrollé jusqu'en bas.
+*/
+.video-playing .gallery-section,
+.video-playing .pricing-section,
+.video-playing .info-section,
+.video-playing .footer-section {
+  display: none;
+}
+
+.video-playing .red-zone {
+  height: 100vh !important;
+  min-height: unset !important;
+}
+
+/* Vidéo centrée verticalement + horizontalement dans le 100vh */
+.video-playing .presentation-video {
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+/* ============ HEADER RIGHT WRAPPER ============ */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ============ NAV DESKTOP WRAPPER ============ */
+/* display:contents = invisible to layout; .nav behaves as direct child of .header-left */
+.nav-desktop {
+  display: contents;
+}
+
+/* ============ HAMBURGER BUTTON ============ */
+.hamburger {
+  display: none; /* shown only at ≤768px via media query */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.35rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.hamburger:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.hamburger__bar {
+  display: block;
+  width: 1.25rem;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+  transform-origin: center;
+}
+
+/* Animated X state */
+.hamburger--open .hamburger__bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger--open .hamburger__bar:nth-child(2) {
+  opacity: 0;
+  width: 0;
+}
+.hamburger--open .hamburger__bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ============ MOBILE NAV PANEL ============ */
+.mobile-nav {
+  display: none; /* shown at ≤768px */
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease;
+  background: rgba(12, 28, 60, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 1.5rem;
+}
+
+.mobile-nav--open {
+  max-height: 24rem;
+  opacity: 1;
+  padding: 1rem 1.5rem 1.25rem;
+}
+
+.mobile-nav a {
+  display: block;
+  color: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 500;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  transition: color 0.2s, padding-left 0.2s;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.mobile-nav a:last-child {
+  border-bottom: none;
+}
+
+.mobile-nav a:hover {
+  color: #4dd8c0;
+  padding-left: 0.5rem;
+}
+
+.mobile-nav__phone {
+  color: #4dd8c0 !important;
+  font-weight: 600 !important;
+  margin-top: 0.5rem;
+}
+
 /* ============ RESPONSIVE & MOBILE ADAPTATIONS ============ */
-/* L'approche est Mobile-First et Desktop-First combinée via RemScaling pour la base, et des restructurations Layout profondes pour chaque breakpoint. */
 
-:root {
-  --base-size: 16px;
-}
+/* ─────────────────────────────────────────────────────────────
+   STRATÉGIE :
+   • html font-size scaling propage toutes les valeurs rem
+   • Hamburger activé à ≤768px ; nav-desktop masquée au même seuil
+   • red-zone : height auto + min-height adaptatif par palier
+   • features-bar : grille 2×2 à 1024px, 1 col à 480px
+   • Pricing : 3 col ≥1024px, 2 col 768-1024px, 1 col <768px
+   • 1200px comble le trou entre 1366px et 1024px
+   • 320px couvre Galaxy Fold fermé et anciens iPhone SE
+───────────────────────────────────────────────────────────── */
 
+:root { --base-size: 16px; }
+
+/* ═══ 1) DESKTOP LARGE ≥ 1600px ═══ */
 @media (min-width: 1600px) {
-  /* 1) Desktop Large */
   html { font-size: 17px; }
-  .hero-left { width: 44rem; }
+  .header-inner { padding: 0.875rem 6rem; }
+  .hero-left    { width: 44rem; }
   .form-section { width: 44rem; }
+  .features-bar { padding-inline: 6rem; }
 }
 
+/* ═══ 2) DESKTOP STANDARD / LAPTOP ≤ 1366px ═══ */
 @media (max-width: 1366px) {
-  /* 2) Desktop standard / Laptop */
   html { font-size: 14.5px; }
-  
-  .main-content {
-    gap: 1.5rem;
-    padding-inline: 2rem;
-  }
-  
-  .hero-left, .form-section {
-    width: 48%; /* Fluid instead of fixed */
-  }
-  
-  .features-bar {
-    padding-inline: 2rem;
-  }
-  
-  .services-grid-top { grid-template-columns: repeat(3, 1fr); }
-  .services-grid-bottom { grid-template-columns: repeat(2, 1fr); }
-  
-  .pricing-grid-top { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-  .pricing-grid-bottom { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .header-inner { padding: 0.875rem 2.5rem; }
+  .main-content { gap: 1.25rem; padding-inline: 2rem; }
+  .hero-left, .form-section { width: 48%; }
+  .features-bar { padding-inline: 2rem; }
+  .services-grid-top    { grid-template-columns: repeat(3, 1fr); gap: 1.8rem; }
+  .services-grid-bottom { grid-template-columns: repeat(2, 1fr); gap: 1.8rem; }
+  .pricing-grid-top     { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .pricing-grid-bottom  { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
 }
 
-@media (max-width: 1024px) {
-  /* 3) Tablette */
+/* ═══ 3) NOUVEAU : INTERMÉDIAIRE ≤ 1200px ═══ */
+@media (max-width: 1200px) {
   html { font-size: 14px; }
-  
-  .main-content {
-    flex-direction: column;
-    align-items: center;
-    padding-inline: 3rem;
-  }
-  
-  .hero-left {
-    width: 100%;
-    max-width: 42rem;
-    align-items: center;
-    text-align: center;
-    background: rgba(10, 25, 55, 0.4);
-    backdrop-filter: blur(1rem);
-    -webkit-backdrop-filter: blur(1rem);
-    margin-bottom: 2rem;
-  }
-
-  .gallery-container {
-    flex-direction: column;
-    text-align: center;
-    gap: 2rem;
-    padding: 2rem;
-  }
-  
-  .gallery-left h2 {
-    font-size: 2.2rem;
-  }
-  
-  .gallery-frame {
-    width: 100%;
-  }
-
-  .form-section {
-    width: 100%;
-    max-width: 42rem;
-  }
-
-  .features-row {
-    justify-content: center;
-  }
-
-  .hero-buttons {
-    justify-content: center;
-  }
-
-  .features-bar-inner {
-    flex-wrap: wrap;
-  }
-
-  .feature-card {
-    flex: 1 1 45%;
-  }
-
-  /* Overlay Video Section */
-  .services-overlay {
-    width: 95%;
-  }
-
-  .services-grid-top, .services-grid-bottom {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .presentation-video {
-    width: 85%;
-    top: calc(8rem - 40px);
-  }
-  
-  .red-zone {
-    height: 1800px;
-  }
+  .header-inner { padding: 0.875rem 2rem; }
+  .main-content { gap: 1rem; padding-inline: 1.5rem; }
+  .hero-left, .form-section { width: 48.5%; }
+  .logo-text { font-size: 1rem; }
+  .features-bar { padding-inline: 1.5rem; }
+  .features-bar-inner { gap: 0.5rem; }
+  .services-grid-top, .services-grid-bottom { gap: 1.5rem; }
+  .pricing-grid-top, .pricing-grid-bottom { gap: 1.25rem; }
 }
 
-@media (max-width: 768px) {
-  /* 4) Grand Smartphone */
-  html { font-size: 13px; }
-  
-  .header-inner {
-    padding: 1rem 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
-  }
-  
-  .header-left {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .nav {
-    margin: 0;
-  }
+/* ═══ 4) TABLETTE PORTRAIT ≤ 1024px ═══ */
+@media (max-width: 1024px) {
+  html { font-size: 14px; }
+  .header-inner { padding: 0.875rem 1.75rem; }
 
   .main-content {
-    padding-inline: 1.5rem;
-    padding-top: 1.5rem;
-  }
-
-  .hero-left h1 {
-    font-size: 2.2rem;
-    margin-bottom: 1.5rem;
-  }
-
-  /* On empile les champs de formulaire qui étaient par deux */
-  .form-row {
     flex-direction: column;
-    gap: 0;
-  }
-
-  .form-card input, .form-card textarea {
-    margin-bottom: 0.8rem;
-  }
-  
-  .services-checkboxes {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-  }
-
-  .services-grid-top, .services-grid-bottom,
-  .pricing-grid-top, .pricing-grid-bottom,
-  .steps-grid, .reviews-grid, .area-grid,
-  .approach-list { 
-    grid-template-columns: 1fr; 
-  }
-
-  .footer-container {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .presentation-video {
-    width: 95%;
-    top: 5rem;
-    border-radius: 1.5rem;
-  }
-
-  .red-zone {
-    height: auto;
-    min-height: 2500px;
-    padding-bottom: 3rem;
-  }
-
-  .gallery-section {
-    padding: 2rem 1.5rem;
-  }
-
-  .gallery-container {
-    padding: 1.5rem;
+    align-items: center;
+    padding: 2rem 2rem 3rem;
     gap: 1.5rem;
   }
 
-  .gallery-left h2 {
-    font-size: 1.8rem;
-  }
-  
-  .pricing-section {
-    padding: 2rem 1.5rem;
-  }
-
-  .pricing-header h2 {
-    font-size: 2.2rem;
-  }
-
-  .info-section {
-    padding: 0 1.5rem 4rem;
-  }
-
-  .info-title {
-    font-size: 2.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  /* 5) Smartphone Standard */
-  html { font-size: 12px; }
-  
-  .header-inner {
-    padding: 0.8rem;
-  }
-  
-  .nav {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-  .nav-dot { display: none; }
-
   .hero-left {
-    padding: 1.2rem;
-  }
-  
-  .hero-left h1 {
-    font-size: 2rem;
-  }
-
-  .hero-description {
-    font-size: 1.1rem;
-  }
-
-  /* Les boutons d'action s'empilent en pleine largeur */
-  .hero-buttons {
-    flex-direction: column;
     width: 100%;
-    align-items: stretch;
-  }
-
-  .btn-primary, .btn-secondary {
-    text-align: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    padding: 1rem;
-  }
-
-  .features-row {
-    flex-direction: column;
+    max-width: 46rem;
     align-items: center;
-    gap: 0.5rem;
-  }
-
-  .feature {
-    justify-content: center;
-  }
-
-  .feature-card {
-    flex: 1 1 100%;
-  }
-
-  .bottom-call {
-    display: flex;
-    flex-direction: column;
     text-align: center;
-    align-items: center;
+    background: rgba(10, 25, 55, 0.08);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
-  
-  .bottom-call-info {
-    justify-content: center;
-    margin-bottom: 1rem;
+
+  .rating-row   { justify-content: center; }
+  .features-row { justify-content: center; }
+  .hero-buttons { justify-content: center; }
+
+  .hero-description { font-size: 1.28rem; }
+
+  .form-section { width: 100%; max-width: 46rem; }
+
+  .features-bar { padding-inline: 1.75rem; margin-top: 0.5rem; }
+  .features-bar-inner {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
+  .feature-card { flex: none; width: 100%; }
+
+  .red-zone { height: auto; min-height: 1600px; }
+  .services-overlay { width: 94%; }
+  .services-grid-top, .services-grid-bottom { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .presentation-video { width: 88%; top: calc(8rem - 40px); border-radius: 2rem; }
+
+  .gallery-container { flex-direction: column; text-align: center; gap: 1.5rem; padding: 2rem; }
+  .gallery-left h2  { font-size: 2.2rem; }
+  .gallery-frame    { width: 100%; }
+
+  .pricing-grid-top    { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .pricing-grid-bottom { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+
+  .steps-grid, .reviews-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+  .area-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
 }
 
+/* ═══ 5) GRAND SMARTPHONE ≤ 768px — activation hamburger ═══ */
+@media (max-width: 768px) {
+  html { font-size: 13px; }
+
+  .header-inner { padding: 0.85rem 1.25rem; flex-wrap: nowrap; justify-content: space-between; }
+  .header-left  { flex-direction: row; gap: 0; flex: 1; min-width: 0; }
+  .header-phone { font-size: 0.8rem; padding: 0.45rem 0.8rem; }
+
+  /* Activer le menu hamburger */
+  .nav-desktop { display: none; }
+  .hamburger   { display: flex; }
+  .mobile-nav  { display: flex; }
+
+  .main-content { padding: 1.5rem 1.25rem 2.5rem; gap: 1.25rem; }
+  .hero-left    { max-width: 100%; padding: 1.5rem 1.25rem; }
+  .hero-left h1 { font-size: 2.15rem; margin-bottom: 1.5rem; }
+  .hero-description { font-size: 1.22rem; }
+  .form-section { max-width: 100%; }
+
+  .form-row { flex-direction: column; gap: 0; }
+  .form-card input, .form-card textarea { margin-bottom: 0.75rem; }
+  .services-checkboxes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
+  .features-bar { padding-inline: 1.25rem; }
+
+  .red-zone { height: auto; min-height: 1600px; padding-bottom: 3rem; }
+  .services-overlay { width: 96%; }
+
+  /* Rangée 1 : 3 cartes compactes côte à côte */
+  .services-grid-top {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 0.75rem;
+    row-gap: 3rem;
+    margin-bottom: 3rem;
+  }
+  .services-grid-top .service-card {
+    min-height: 15rem;
+    padding: 1.6rem 0.75rem;
+  }
+  .services-grid-top .sc-title { font-size: 0.85rem; }
+  .services-grid-top .sc-desc  { font-size: 0.8rem; }
+
+  /* Rangées 2 et 3 : 2 colonnes */
+  .services-grid-bottom {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 0.75rem;
+    row-gap: 3rem;
+  }
+  .service-card { min-height: 18rem; padding: 2.2rem 1.2rem; }
+
+  .presentation-video { width: 96%; top: 4.5rem; border-radius: 1.5rem; }
+
+  .gallery-section   { padding: 2rem 1.25rem; }
+  .gallery-container { padding: 1.5rem; gap: 1.25rem; }
+  .gallery-left h2   { font-size: 1.9rem; }
+
+  .pricing-section   { padding: 2rem 1.25rem; }
+  .pricing-header h2 { font-size: 2.2rem; }
+  .pricing-grid-top, .pricing-grid-bottom { grid-template-columns: 1fr; gap: 1.25rem; }
+
+  .info-section { padding: 0 1.25rem 4rem; }
+  .info-title   { font-size: 2.2rem; }
+  .area-grid, .steps-grid, .reviews-grid, .approach-list { grid-template-columns: 1fr; gap: 1rem; }
+
+  .footer-container { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
+}
+
+/* ═══ 6) SMARTPHONE STANDARD ≤ 480px ═══ */
+@media (max-width: 480px) {
+  html { font-size: 12px; }
+
+  .header-inner { padding: 0.75rem 1rem; }
+  .logo-text    { font-size: 1rem; overflow: hidden; text-overflow: ellipsis; max-width: 11rem; }
+  .header-phone { font-size: 0.75rem; padding: 0.4rem 0.65rem; gap: 0.3rem; }
+  .header-phone svg { width: 0.85rem; height: 0.85rem; }
+
+  .main-content { padding: 1.25rem 1rem 2rem; }
+  .hero-left    { padding: 1.25rem 1rem; background: rgba(10, 25, 55, 0.08); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .hero-left h1 { font-size: 2rem; margin-bottom: 1.25rem; }
+  .hero-description { font-size: 1.18rem; }
+
+  .hero-buttons { flex-direction: column; width: 100%; align-items: stretch; gap: 0.75rem; }
+  .btn-primary, .btn-secondary { text-align: center; justify-content: center; font-size: 1.1rem; padding: 1rem; width: 100%; }
+
+  .features-row { flex-direction: column; align-items: center; gap: 0.5rem; }
+  .feature { justify-content: center; }
+
+  .features-bar { padding-inline: 1rem; }
+  .features-bar-inner { grid-template-columns: 1fr; gap: 0.65rem; }
+
+  .form-card    { padding: 1.25rem 1rem; }
+  .bottom-call  { display: flex; flex-direction: column; text-align: center; align-items: center; }
+  .bottom-call-info { justify-content: center; margin-bottom: 1rem; }
+
+  .red-zone { min-height: 1700px; }
+  .services-grid-top  { column-gap: 0.6rem; row-gap: 2.4rem; margin-bottom: 2.4rem; }
+  .services-grid-top .service-card { min-height: 13rem; padding: 1.5rem 0.65rem; }
+  .services-grid-top .sc-title { font-size: 0.82rem; }
+  .services-grid-bottom { column-gap: 0.6rem; row-gap: 2.4rem; }
+  .service-card { min-height: 16rem; padding: 2rem 1rem; }
+
+  .gallery-section   { padding: 1.5rem 0.75rem; }
+  .gallery-container { padding: 1.25rem; border-radius: 1rem; }
+  .gallery-left h2   { font-size: 1.7rem; }
+
+  .pricing-section   { padding: 1.5rem 0.75rem 3rem; }
+  .pricing-header    { margin-bottom: 2rem; }
+  .pricing-header h2 { font-size: 2rem; }
+  .pricing-header p  { font-size: 1rem; }
+
+  .info-section { padding: 0 0.75rem 3rem; }
+  .info-title   { font-size: 2rem; }
+  .faq-question { font-size: 1rem; padding: 1.25rem 1.5rem; }
+}
+
+/* ═══ 7) SMARTPHONE ÉTROIT ≤ 360px ═══ */
 @media (max-width: 360px) {
-  /* 6) Smartphone très étroit / très petit écran */
   html { font-size: 11px; }
 
-  .logo-text { font-size: 1.2rem; }
-  
-  .hero-left h1 {
-    font-size: 1.8rem;
-    line-height: 1.15;
-    letter-spacing: -0.05rem;
-  }
+  .header-inner { padding: 0.7rem 0.85rem; }
+  .logo-text    { font-size: 1.05rem; max-width: 9.5rem; }
+  .logo-circle  { width: 2rem; height: 2rem; font-size: 0.72rem; }
+  .header-phone { display: none; } /* disponible dans le mobile-nav */
+  .hamburger    { width: 2.25rem; height: 2.25rem; }
 
-  .main-content {
-    padding-inline: 0.8rem;
-  }
+  .main-content { padding-inline: 0.85rem; }
+  .hero-left h1     { font-size: 1.8rem; line-height: 1.15; letter-spacing: -0.03rem; }
+  .hero-description { font-size: 1.15rem; }
+  .form-card        { padding: 1.1rem 0.85rem; }
+  .form-card h2 { font-size: 1.25rem; }
+  .checkbox-label   { font-size: 1rem; }
+  .call-info strong { font-size: 1rem; }
 
-  .form-card {
-    padding: 1.2rem;
-  }
+  .gallery-left h2   { font-size: 1.5rem; }
+  .pricing-header h2 { font-size: 1.8rem; }
+  .info-title        { font-size: 1.8rem; }
+  .red-zone          { min-height: 1600px; }
+  .services-grid-top  { column-gap: 0.55rem; row-gap: 2.2rem; margin-bottom: 2.2rem; }
+  .services-grid-top .service-card { min-height: 12rem; padding: 1.4rem 0.6rem; }
+  .services-grid-bottom { column-gap: 0.55rem; row-gap: 2.2rem; }
+  .service-card { min-height: 15rem; padding: 1.9rem 0.9rem; }
+}
 
-  .checkbox-label {
-    font-size: 1rem;
-  }
+/* ═══ 8) NOUVEAU : TRÈS PETIT ÉCRAN ≤ 320px (Galaxy Fold fermé, anciens iPhone SE) ═══ */
+@media (max-width: 320px) {
+  html { font-size: 10.5px; }
 
-  .call-info strong {
-    font-size: 1rem;
-  }
+  .header-inner { padding: 0.65rem 0.75rem; }
+  .logo-text    { font-size: 1rem; max-width: 7.5rem; }
+  .logo-circle  { width: 1.85rem; height: 1.85rem; font-size: 0.66rem; flex-shrink: 0; }
+  .hamburger    { width: 2rem; height: 2rem; gap: 4px; }
+  .hamburger__bar { width: 1.05rem; }
+
+  .main-content     { padding-inline: 0.75rem; padding-top: 1rem; }
+  .hero-left        { padding: 1rem 0.75rem; }
+  .hero-left h1     { font-size: 1.65rem; line-height: 1.2; }
+  .hero-description { font-size: 1.12rem; line-height: 1.65; }
+  .rating-text      { font-size: 0.95rem; }
+
+  .form-card     { padding: 1rem 0.75rem; border-radius: 0.625rem; }
+  .form-card h2  { font-size: 1.15rem; }
+  .form-subtitle { font-size: 0.875rem; }
+  .btn-primary, .btn-secondary { font-size: 1.05rem; padding: 0.9rem; }
+
+  .features-bar { padding-inline: 0.75rem; }
+
+  .mobile-nav       { padding: 0 0.9rem; }
+  .mobile-nav--open { padding: 0.85rem 0.9rem 1rem; }
+  .mobile-nav a     { font-size: 1rem; padding: 0.65rem 0; }
+
+  .gallery-container { padding: 1rem; border-radius: 0.75rem; }
+  .gallery-left h2   { font-size: 1.35rem; }
+
+  .pricing-card      { padding: 1.75rem 1.25rem; }
+  .info-title        { font-size: 1.6rem; }
+  .faq-question      { font-size: 0.95rem; padding: 1rem 1.25rem; }
+  .red-zone          { min-height: 1500px; }
+  .services-grid-top  { column-gap: 0.5rem; row-gap: 2rem; margin-bottom: 2rem; }
+  .services-grid-top .service-card { min-height: 11rem; padding: 1.3rem 0.55rem; }
+  .services-grid-bottom { column-gap: 0.5rem; row-gap: 2rem; }
+  .service-card { min-height: 14rem; padding: 1.8rem 0.8rem; }
+  .footer-section    { padding: 2.5rem 0.75rem 1.5rem; }
 }
