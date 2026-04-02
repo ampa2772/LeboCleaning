@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import './LeboLanding.css';
 
+const assetPath = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
+
 const servicesDataTop = [
   {
     title: "Residential Cleaning",
@@ -91,9 +93,12 @@ function LeboLanding() {
   const [currentBgIndex, setCurrentBgIndex] = useState(0);
   
   const galleryImages = [
-    '/slide1.png', '/slide2.png', '/slide3.png', '/slide4.png',
-    '/slide5.png', '/slide6.png', '/slide7.png'
-  ];
+    'slide1.png', 'slide2.png', 'slide3.png', 'slide4.png',
+    'slide5.png', 'slide6.png', 'slide7.png'
+  ].map(assetPath);
+  const appStyle = {
+    '--bg-image-url': `url("${assetPath('bg.png')}")`,
+  };
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
   const [openFaq, setOpenFaq] = useState(null);
 
@@ -207,7 +212,7 @@ function LeboLanding() {
   };
 
   return (
-    <div className="lebo-landing">
+    <div className="lebo-landing" style={appStyle}>
       {/* Background image - no overlay */}
       <div className="bg-image" />
 
@@ -407,7 +412,7 @@ function LeboLanding() {
       {/* Red Zone */}
       <section className="red-zone" ref={redZoneRef}>
         {!isVideoEnded && (
-          <img src="/video-bg.png" alt="Video Background" className="video-bg-img" />
+          <img src={assetPath('video-bg.png')} alt="Video Background" className="video-bg-img" />
         )}
         
         {isVideoEnded && (
@@ -416,7 +421,7 @@ function LeboLanding() {
               <video
                 key={num}
                 ref={(el) => (bgVideosRef.current[i] = el)}
-                src={`/${num}.mp4`}
+                src={assetPath(`${num}.mp4`)}
                 className={`bg-video ${i === currentBgIndex ? 'active' : ''}`}
                 muted
                 playsInline
@@ -433,7 +438,7 @@ function LeboLanding() {
         
         {showVideo && !isVideoEnded && (
           <video 
-            src="/presentation.mp4" 
+            src={assetPath('presentation.mp4')} 
             className="presentation-video fade-in" 
             autoPlay 
             muted
