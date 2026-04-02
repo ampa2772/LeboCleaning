@@ -1635,8 +1635,13 @@
   }
   .feature-card { flex: none; width: 100%; }
 
-  .red-zone { height: auto; min-height: 1600px; }
-  .services-overlay { width: 94%; }
+  .red-zone { height: auto; overflow: visible; }
+  .services-overlay {
+    position: relative !important;
+    top: auto !important; left: auto !important; transform: none !important;
+    width: 94%; margin: 0 auto;
+    padding-top: 3rem; padding-bottom: 3rem;
+  }
   .services-grid-top, .services-grid-bottom { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
   .presentation-video { width: 88%; top: calc(8rem - 40px); border-radius: 2rem; }
 
@@ -1676,8 +1681,8 @@
 
   .features-bar { padding-inline: 1.25rem; }
 
-  .red-zone { height: auto; min-height: 1600px; padding-bottom: 3rem; }
-  .services-overlay { width: 96%; }
+  .red-zone { height: auto; }
+  .services-overlay { width: 96%; padding-top: 2.5rem; padding-bottom: 3rem; }
 
   /* Rangée 1 : 3 cartes compactes côte à côte */
   .services-grid-top {
@@ -1747,7 +1752,6 @@
   .bottom-call  { display: flex; flex-direction: column; text-align: center; align-items: center; }
   .bottom-call-info { justify-content: center; margin-bottom: 1rem; }
 
-  .red-zone { min-height: 1700px; }
   .services-grid-top  { column-gap: 0.6rem; row-gap: 2.4rem; margin-bottom: 2.4rem; }
   .services-grid-top .service-card { min-height: 13rem; padding: 1.5rem 0.65rem; }
   .services-grid-top .sc-title { font-size: 0.82rem; }
@@ -1789,7 +1793,6 @@
   .gallery-left h2   { font-size: 1.5rem; }
   .pricing-header h2 { font-size: 1.8rem; }
   .info-title        { font-size: 1.8rem; }
-  .red-zone          { min-height: 1600px; }
   .services-grid-top  { column-gap: 0.55rem; row-gap: 2.2rem; margin-bottom: 2.2rem; }
   .services-grid-top .service-card { min-height: 12rem; padding: 1.4rem 0.6rem; }
   .services-grid-bottom { column-gap: 0.55rem; row-gap: 2.2rem; }
@@ -1829,7 +1832,6 @@
   .pricing-card      { padding: 1.75rem 1.25rem; }
   .info-title        { font-size: 1.6rem; }
   .faq-question      { font-size: 0.95rem; padding: 1rem 1.25rem; }
-  .red-zone          { min-height: 1500px; }
   .services-grid-top  { column-gap: 0.5rem; row-gap: 2rem; margin-bottom: 2rem; }
   .services-grid-top .service-card { min-height: 11rem; padding: 1.3rem 0.55rem; }
   .services-grid-bottom { column-gap: 0.5rem; row-gap: 2rem; }
